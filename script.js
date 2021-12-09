@@ -2,51 +2,68 @@
 var diceRoll = function(){
   return Math.floor(Math.random()*6+1)
 }
-var numberOfPlayers = 5
-var player = 1
-var chosenDice = false
-var array = []
+
+// score leaderboard tracker game with 4 players//
+var numOfPlayers = 1000
+var scoreArray = [0]
+var player = 1 
+var numOfPlayersSpecified = false
 var diceOne = 0
 var diceTwo = 0
 var main = function(input){
-  if (chosenDice == false){
-    // if all players played restart the game from player 1
-    if (numberOfPlayers == player){
-      player = 1
-      array = []
+  // take the user input as the number of players in the game
+  if (numOfPlayersSpecified==false){
+    // input validation
+    if (input <2 || input >10){
+      return `Greetings! Please indicate the number of players`
     }
-    // return players roll
-    diceOne = diceRoll()
-    diceTwo = diceRoll()
-    chosenDice = true
-    return `Welcome Player ${player}.<br>You rolled ${diceOne} for Dice 1 and ${diceTwo} for Dice 2.<br> Choose the order of the dice "1" or "2".`
+    numOfPlayers = input;
+    numOfPlayersSpecified = true
+    return "Starting Game. It is Player 1's turn. Press Submit to Roll"
   }
-
-  if (chosenDice == true){
-    //input validation
-    if (input!=1 && input!= 2){
-      return `Welcome Player ${player}.<br>You rolled ${diceOne} for Dice 1 and ${diceTwo} for Dice 2.<br> Choose the order of the dice "1" or "2".`
-    }
-
-    // find dice number
-    firstDiceIndex = input
-    diceNumber = diceOne * 10 + diceTwo 
-    if (firstDiceIndex == 2){
-      diceNumber = diceTwo *10 + diceOne
-    }
-    // add dicenumber to the array
-    array.push(diceNumber) 
-    player += 1
-    // return winner if all players played
-    if (player == numberOfPlayers){
-      var winIndex = array.indexOf(Math.max(...array));
-      chosenDice = false
-      return `Player ${winIndex +1} is the winner!<br><br> Press the submit button if you would like to play again!`
-    }
-    // next players turn
-    chosenDice = false;
-    return `Player ${player-1}, you chose Dice ${firstDiceIndex} first.<br>Your number is ${diceNumber}.<br>It is now Player ${player}'s turn.<br>Please hit the Submit button to begin your turn Player ${player}`
-
-
+  // player playing is same as number of players restart player count to 1
+  if (player == Number(numOfPlayers) + 1){
+    player = 1
   }
+  // roll dice and determine dice number for each player
+  diceOne = diceRoll()
+  diceTwo = diceRoll()
+  diceNumber = determineDiceNumber(diceOne,diceTwo)
+  // add dice number to array
+  if (scoreArray.length < player){
+    scoreArray.push(diceNumber)
+  }
+  else{
+    scoreArray[player-1] += diceNumber
+  }
+  // increment the player count
+  player += 1
+  // make a copy of the scoreArray so as to acheive score board
+  tempArray = [...scoreArray]
+  scoreBoard = getScoreBoard(tempArray)
+  return ` Hello Player ${player-1}. <br>Your number rolled for dice one is ${diceOne} <br> Your number rolled for dice two is ${diceTwo}.<br> Your dice num for this turn is ${diceNumber}. ${scoreBoard}.`
+
+
+
+}
+
+var determineDiceNumber = function(diceOne,diceTwo){
+  number1 = diceOne * 10 + diceTwo
+  number2 = diceTwo * 10 + diceOne
+  if (number1 > number2){
+    return number1
+  }
+  return number2
+}
+
+var getScoreBoard = function(array){
+  str = ``
+  for (i = 0; i<array.length;i+=1){
+    maxIndex = array.indexOf(Math.max(...array))
+    console.log(maxIndex)
+    console.log(array[maxIndex])
+    str += `<br>Player ${maxIndex+1} score: ${array[maxIndex]}`
+    array[maxIndex] = -1
+  }
+  return str
 }
